@@ -7,6 +7,7 @@
 #include "AudioInput.hpp"
 
 #define AUDIO_BUFFER_SIZE 512 /*number of samples*/
+#define AUDIO_POLLING_TIME ((AUDIO_BUFFER_SIZE / (SAMPLE_RATE / 1000)) * 1.1) /*time needed to gather enough samples*/
 #define AUDIO_SOUND_DURATION 5 /*duration in seconds*/
 
 int32_t audioBuffer[AUDIO_BUFFER_SIZE];
@@ -25,12 +26,10 @@ void taskFunction(void* pvParameter) {
     
     microphone.startRecording();
     while (1) {
-        // printf("--------------------------------------%d--------------------------------------\n", total_samples_to_read);
         if (0 == total_samples_to_read)
         {
             printf("Finished sampling audio\n");
             total_samples_to_read = (size_t)(SAMPLE_RATE * AUDIO_SOUND_DURATION);
-            vTaskDelay(pdMS_TO_TICKS(500));
         }
         else
         {
@@ -46,9 +45,12 @@ void taskFunction(void* pvParameter) {
             total_samples_to_read -= samples_read;
             for (uint16_t idx = 0U; idx < samples_read; idx++)
             {
-                printf("%ld\n", (audioBuffer[idx]));
+                /*24bit data (0x010203) is stored like this: 0x01 0x02 0x03 0x00*/
+                /*8 bit shift to get the data + 3bit shift clean the sample of small noise*/
+                printf("%ld\n", (audioBuffer[idx] >> 11U));
             }
         }
+        vTaskDelay(pdMS_TO_TICKS(AUDIO_POLLING_TIME));
     }
 }
 

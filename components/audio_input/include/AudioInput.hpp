@@ -5,6 +5,8 @@
 #include <stdio.h>
 #include "driver/i2s_std.h"
 #include "driver/gpio.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 
 #define I2S_WS GPIO_NUM_25
 #define I2S_SD GPIO_NUM_33

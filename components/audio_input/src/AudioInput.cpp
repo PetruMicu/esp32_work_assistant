@@ -83,7 +83,12 @@ void AudioInput::startRecording()
         _recording = true;
         status = i2s_channel_enable(_rx_handle);
 
-        if (ESP_OK != status)
+        if (ESP_OK == status)
+        {
+            printf("Audio enable success\n");
+            vTaskDelay(pdMS_TO_TICKS(50));
+        }
+        else
         {
             printf("Audio enable fail: %ld\n", (uint32_t)status);
         }
@@ -99,7 +104,11 @@ void AudioInput::stopRecording()
         _recording = false;
         status = i2s_channel_disable(_rx_handle);
 
-        if (ESP_OK != status)
+        if (ESP_OK == status)
+        {
+            printf("Audio disable success\n");
+        }
+        else
         {
             printf("Audio disable fail: %ld\n", (uint32_t)status);
         }
@@ -111,7 +120,7 @@ size_t AudioInput::readData(int32_t* buffer, size_t size)
     size_t bytesRead;
     esp_err_t status;
 
-    status = i2s_channel_read(_rx_handle, buffer, size, &bytesRead, 10U);
+    status = i2s_channel_read(_rx_handle, buffer, size, &bytesRead, 20U);
 
     if (ESP_OK != status)
     {
