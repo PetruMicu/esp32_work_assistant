@@ -1,77 +1,122 @@
 #include "AudioInput.hpp"
 
-AudioInput::AudioInput() : recording(false), configured(false) {}
+AudioInput::AudioInput() : _recording(false), _configured(false) {}
 
 AudioInput::~AudioInput()
 {
-    if (this->recording) 
+    if (_recording) 
         stopRecording();
-    i2s_driver_uninstall(i2sPort);
+    i2s_del_channel(_rx_handle);
 }
 
 bool AudioInput::init()
 {
-    if (true == this->configured)
+    if (true == _configured)
         return false;
 
-    this->configureI2S();
+    configureI2S();
     return true;
 }
 
 void AudioInput::configureI2S()
 {
-    i2sPort = I2S_NUM_0;
+    esp_err_t status = ESP_OK;
 
-    i2sConfig = {
-        .mode = (i2s_mode_t)(I2S_MODE_MASTER | I2S_MODE_RX), // Receive audio
-        .sample_rate = SAMPLE_RATE,
-        .bits_per_sample = I2S_BITS_PER_SAMPLE_32BIT,
-        .channel_format = I2S_CHANNEL_FMT_ONLY_LEFT,
-        .communication_format = I2S_COMM_FORMAT_I2S,
-        .intr_alloc_flags = ESP_INTR_FLAG_LEVEL1,
-        .dma_buf_count = 8,
-        .dma_buf_len = 1024,
-        .use_apll = false,
-        .tx_desc_auto_clear = false,
-        .fixed_mclk = 0
+    _chan_cfg = 
+    {
+        .id = I2S_PORT,
+        .role = I2S_ROLE_MASTER,
+        .dma_desc_num = DMA_DESC_NUM,
+        .dma_frame_num = DMA_FRAME_NUM,
+        .auto_clear = false,
     };
-    
-    pinConfig = {
-        .bck_io_num = I2S_SCK,
-        .ws_io_num = I2S_WS,
-        .data_out_num = I2S_PIN_NO_CHANGE,
-        .data_in_num = I2S_SD
-    };
+    /* Allocate a new RX channel and get the handle of this channel */
+    status = i2s_new_channel(&_chan_cfg, NULL, &_rx_handle);
 
-    i2s_driver_install(i2sPort, &i2sConfig, 0, NULL);
-    i2s_set_pin(i2sPort, &pinConfig);
-    // i2s_stop(i2sPort);
-    this->configured = true;
+    if (ESP_OK == status)
+    {
+        _std_cfg = 
+        {
+            .clk_cfg = I2S_STD_CLK_DEFAULT_CONFIG(SAMPLE_RATE),
+            .slot_cfg = I2S_STD_PHILIPS_SLOT_DEFAULT_CONFIG(I2S_DATA_BIT_WIDTH_32BIT, I2S_SLOT_MODE_MONO),
+            .gpio_cfg = 
+            {
+                .mclk = I2S_GPIO_UNUSED,
+                .bclk = I2S_SCK,
+                .ws = I2S_WS,
+                .dout = I2S_GPIO_UNUSED,
+                .din = I2S_SD,
+                .invert_flags = 
+                {
+                    .mclk_inv = false,
+                    .bclk_inv = false,
+                    .ws_inv = false,
+                },
+            },
+
+        };
+        /* Initialize the channel */
+        status = i2s_channel_init_std_mode(_rx_handle, &_std_cfg);
+        
+        if (ESP_OK == status)
+        {
+            printf("Audio config success\n");
+            _configured = true;
+        }
+        else
+        {
+            printf("Audio config fail: %ld\n", (uint32_t)status);
+        }
+    }
+    else
+    {
+        printf("Audio config fail: %ld\n", (uint32_t)status);
+    }
 }
 
 void AudioInput::startRecording()
 {
-    if (false == this->recording)
+    esp_err_t status;
+
+    if (false == _recording)
     {
-        recording = true;
-        i2s_start(i2sPort);
+        _recording = true;
+        status = i2s_channel_enable(_rx_handle);
+
+        if (ESP_OK != status)
+        {
+            printf("Audio enable fail: %ld\n", (uint32_t)status);
+        }
     }
 }
 
 void AudioInput::stopRecording()
 {
-    if (true == this->recording)
+    esp_err_t status;
+    
+    if (true == _recording)
     {
-        recording = false;
-        i2s_stop(i2sPort);
+        _recording = false;
+        status = i2s_channel_disable(_rx_handle);
+
+        if (ESP_OK != status)
+        {
+            printf("Audio disable fail: %ld\n", (uint32_t)status);
+        }
     }
 }
 
 size_t AudioInput::readData(int32_t* buffer, size_t size)
 {
     size_t bytesRead;
+    esp_err_t status;
 
-    (void)i2s_read(i2sPort, buffer, size, &bytesRead, portMAX_DELAY);
+    status = i2s_channel_read(_rx_handle, buffer, size, &bytesRead, 10U);
+
+    if (ESP_OK != status)
+    {
+        printf("Audio read fail: %ld\n", (uint32_t)status);
+    }
 
     return bytesRead;
 }

@@ -6,7 +6,7 @@
 #include "rtc_wdt.h"
 #include "AudioInput.hpp"
 
-#define AUDIO_BUFFER_SIZE 1024 /*number of samples*/
+#define AUDIO_BUFFER_SIZE 512 /*number of samples*/
 #define AUDIO_SOUND_DURATION 5 /*duration in seconds*/
 
 int32_t audioBuffer[AUDIO_BUFFER_SIZE];
@@ -46,7 +46,7 @@ void taskFunction(void* pvParameter) {
             total_samples_to_read -= samples_read;
             for (uint16_t idx = 0U; idx < samples_read; idx++)
             {
-                printf("%ld\n", (audioBuffer[idx] >> 11));
+                printf("%ld\n", (audioBuffer[idx]));
             }
         }
     }
