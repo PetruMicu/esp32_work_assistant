@@ -8,11 +8,13 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
+/*INMP441 microphone connections*/
 #define I2S_WS GPIO_NUM_25
 #define I2S_SD GPIO_NUM_33
 #define I2S_SCK GPIO_NUM_32
 
-#define SAMPLE_RATE 16000U
+/*I2S configurations*/
+#define SAMPLE_RATE 16384U
 #define I2S_PORT I2S_NUM_0
 #define DMA_DESC_NUM 6U
 #define DMA_FRAME_NUM 256U

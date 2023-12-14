@@ -4,16 +4,16 @@
 #include "freertos/task.h"
 #include "esp_timer.h"
 #include "rtc_wdt.h"
+#include "Macros.hpp"
 #include "AudioInput.hpp"
-
-#define AUDIO_BUFFER_SIZE 512 /*number of samples*/
-#define AUDIO_POLLING_TIME ((AUDIO_BUFFER_SIZE / (SAMPLE_RATE / 1000)) * 1.1) /*time needed to gather enough samples*/
-#define AUDIO_SOUND_DURATION 5 /*duration in seconds*/
+#include "AudioBuffer.hpp"
 
 int32_t audioBuffer[AUDIO_BUFFER_SIZE];
 
 void taskFunction(void* pvParameter) {
     AudioInput microphone;
+    AudioBuffer<uint16_t, AUDIO_BUFFER_SIZE, AUDIO_WINDOW_BUFFER_SIZE> buffer;
+    printf("%d\n", (int)buffer._window.size());
     size_t samples_read = 0;
     size_t bytes_read = 0;
     size_t total_samples_to_read = (size_t)(SAMPLE_RATE * AUDIO_SOUND_DURATION);

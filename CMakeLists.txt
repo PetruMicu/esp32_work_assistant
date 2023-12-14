@@ -5,4 +5,5 @@
 cmake_minimum_required(VERSION 3.5)
 
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
+set(EXTRA_COMPONENT_DIRS "components/audio_buffer" "components/audio_input")
 project(esp32_work_assistant)
