@@ -1,37 +1,38 @@
-#ifndef AUDIO_BUFFER_H
-#define AUDIO_BUFFER_H
+#pragma once
 
 #include <stdint.h>
 #include <stdio.h>
 #include <array>
-#include "AudioInput.hpp"
+#include <algorithm>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "Macros.hpp"
 
-/*T is data width and N is frame length*/
-template <typename T, std::size_t N>
 class AudioFrame {
+using FrameShape = std::array<AUDIO_DATA_TYPE, AUDIO_BUFFER_SIZE>;
 private:
-    std::array<T, N> _frame;
+    std::array<AUDIO_DATA_TYPE, AUDIO_BUFFER_SIZE> _frame;
 
 public:
-
+    AudioFrame();
+    AudioFrame(const AUDIO_DATA_TYPE* array);
+    AUDIO_DATA_TYPE* accessFrame();
+    void writeFrame(const AUDIO_DATA_TYPE* array);
+    FrameShape::iterator begin() { return _frame.begin(); }
+    FrameShape::iterator end()   { return _frame.end(); }
 };
 
-/*T is data width and N is frame length*/
-template <typename T, std::size_t N, std::size_t W>
 class AudioBuffer {
 private:
-    std::array<AudioFrame<T, N>, W> _window;
-    std::size_t _writeIndex;
-    std::size_t _readIndex;
+    std::array<AudioFrame, AUDIO_WINDOW_SIZE> _window;
+    std::size_t _write_index;
+    std::size_t _read_index;
     std::size_t _frames_in_one_sec;
+    std::size_t _frames_in_buffer;
 public:
     
-    AudioBuffer(std::size_t sample_rate);
-    void pushFrame(const AudioFrame<T, N> &frame);
-    AudioFrame<T, N> popFrame();
-    
+    AudioBuffer();
+    void pushFrame(const AudioFrame &frame);
+    AudioFrame popFrame();
+    bool gotOneSecond();
 };
-
-#endif /*AUDIO_BUFFER_H*/

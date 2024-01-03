@@ -1,29 +1,24 @@
-#ifndef AUDIO_INPUT_H
-#define AUDIO_INPUT_H
+#pragma once
 
 #include <stdint.h>
 #include <stdio.h>
+#include <array>
 #include "driver/i2s_std.h"
 #include "driver/gpio.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "Macros.hpp"
+#include "AudioBuffer.hpp"
 
-/*INMP441 microphone connections*/
-#define I2S_WS GPIO_NUM_25
-#define I2S_SD GPIO_NUM_33
-#define I2S_SCK GPIO_NUM_32
-
-/*I2S configurations*/
-#define SAMPLE_RATE 16384U
-#define I2S_PORT I2S_NUM_0
-#define DMA_DESC_NUM 6U
-#define DMA_FRAME_NUM 256U
+void sampleTask(void* pvParameter);
 
 class AudioInput
 {
 private:
     bool _recording;
     bool _configured;
+    // I2S reader task
+    TaskHandle_t _sample_task_handler;
 
     void configureI2S();
 public:
@@ -37,7 +32,6 @@ public:
     bool init();
     void startRecording();
     void stopRecording();
-    size_t readData(int32_t* buffer, size_t size);
+    size_t readData(AudioFrame& audio_frame);
 };
 
-#endif /*AUDIO_INPUT_H*/

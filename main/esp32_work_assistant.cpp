@@ -2,63 +2,55 @@
 #include <stdint.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "esp_timer.h"
-#include "rtc_wdt.h"
+#include "freertos/queue.h"
+#include "esp_task_wdt.h"
 #include "Macros.hpp"
-#include "AudioInput.hpp"
 #include "AudioBuffer.hpp"
+#include "AudioInput.hpp"
 
-int32_t audioBuffer[AUDIO_BUFFER_SIZE];
+QueueHandle_t audioQueue;
+AudioInput microphone;
+AudioBuffer sample_buffer;
 
-void taskFunction(void* pvParameter) {
-    AudioInput microphone;
-    AudioBuffer<uint16_t, AUDIO_BUFFER_SIZE, AUDIO_WINDOW_BUFFER_SIZE> buffer;
-    printf("%d\n", (int)buffer._window.size());
-    size_t samples_read = 0;
-    size_t bytes_read = 0;
-    size_t total_samples_to_read = (size_t)(SAMPLE_RATE * AUDIO_SOUND_DURATION);
-
-    if (false == microphone.init())
-    {
-        printf("Microphone initialization failed\n");
-        return;
-    }
+void processTask(void* pvParameter) {
+    AUDIO_DATA_TYPE raw_samples[AUDIO_BUFFER_SIZE];
+    AudioFrame sample_frame;
     
-    microphone.startRecording();
     while (1) {
-        if (0 == total_samples_to_read)
-        {
-            printf("Finished sampling audio\n");
-            total_samples_to_read = (size_t)(SAMPLE_RATE * AUDIO_SOUND_DURATION);
-        }
-        else
-        {
-            if (total_samples_to_read >= AUDIO_BUFFER_SIZE)
+        if (xQueueReceive(audioQueue, raw_samples, portMAX_DELAY) == pdPASS) {
+            sample_frame.writeFrame(raw_samples);
+            sample_buffer.pushFrame(sample_frame);
+            if (sample_buffer.gotOneSecond())
             {
-                bytes_read = microphone.readData(audioBuffer, sizeof(int32_t) * AUDIO_BUFFER_SIZE);
+                
             }
-            else
-            {
-                bytes_read = microphone.readData(audioBuffer, sizeof(int32_t) * total_samples_to_read);
-            }
-            samples_read = bytes_read / sizeof(int32_t);
-            total_samples_to_read -= samples_read;
-            for (uint16_t idx = 0U; idx < samples_read; idx++)
-            {
-                /*24bit data (0x010203) is stored like this: 0x01 0x02 0x03 0x00*/
-                /*8 bit shift to get the data + 3bit shift clean the sample of small noise*/
-                printf("%ld\n", (audioBuffer[idx] >> 11U));
-            }
+            printf("%ld\n", (sample_buffer.popFrame().accessFrame()[0U] >> 11U));
+            // for (auto sample : sample_buffer.popFrame())
+            // {
+            //     /*24bit data (0x010203) is stored like this: 0x01 0x02 0x03 0x00*/
+            //     /*8 bit shift to get the data + 3bit shift clean the sample of small noise*/
+            //     printf("%ld\n", (sample >> 11U));
+            // }
         }
         vTaskDelay(pdMS_TO_TICKS(AUDIO_POLLING_TIME));
     }
 }
 
 extern "C" void app_main() {
-     xTaskCreate(taskFunction,            // Task function
-                "RecordSoundTask",       // Task name (for debugging)
+    audioQueue = xQueueCreate(AUDIO_QUEUE_SIZE, sizeof(AudioFrame));
+    xTaskCreate(processTask,               // Task function
+                "ProcessTask",             // Task name (for debugging)
                 4096,                     // Stack size (adjust as needed)
                 NULL,                     // Task parameter
                 configMAX_PRIORITIES - 1, // Task priority (adjust as needed)
                 NULL);
+
+    
+    if (false == microphone.init())
+    {
+        printf("Microphone initialization failed\n");
+        return;
+    }
+    vTaskDelay(pdMS_TO_TICKS(1000));
+    microphone.startRecording();
 }

@@ -401,4 +401,5 @@ FodyWeavers.xsd
 build/
 sdkconfig
 sdkconfig.old
+.vscode/*
 

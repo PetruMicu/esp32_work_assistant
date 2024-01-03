@@ -86,6 +86,12 @@ void AudioInput::startRecording()
         if (ESP_OK == status)
         {
             printf("Audio enable success\n");
+            xTaskCreate(sampleTask,               // Task function
+                        "SampleTask",             // Task name (for debugging)
+                        4096,                     // Stack size (adjust as needed)
+                        this,                     // Task parameter
+                        configMAX_PRIORITIES - 1, // Task priority (adjust as needed)
+                        &_sample_task_handler);
             vTaskDelay(pdMS_TO_TICKS(50));
         }
         else
@@ -107,6 +113,7 @@ void AudioInput::stopRecording()
         if (ESP_OK == status)
         {
             printf("Audio disable success\n");
+            vTaskDelete(_sample_task_handler);
         }
         else
         {
@@ -115,17 +122,35 @@ void AudioInput::stopRecording()
     }
 }
 
-size_t AudioInput::readData(int32_t* buffer, size_t size)
+size_t AudioInput::readData(AudioFrame& audio_frame)
 {
     size_t bytesRead;
     esp_err_t status;
-
-    status = i2s_channel_read(_rx_handle, buffer, size, &bytesRead, 20U);
+    status = i2s_channel_read(_rx_handle, audio_frame.accessFrame(), (AUDIO_BUFFER_SIZE * sizeof(AUDIO_DATA_TYPE)), &bytesRead, portMAX_DELAY);
 
     if (ESP_OK != status)
     {
         printf("Audio read fail: %ld\n", (uint32_t)status);
     }
+    else if ((AUDIO_BUFFER_SIZE * sizeof(AUDIO_DATA_TYPE)) != bytesRead)
+    {
+        printf("Audio read fail: Bytes read %d\n", bytesRead);
+    }
 
     return bytesRead;
+}
+
+void sampleTask(void* pvParameter) {
+    AudioInput* audio_input = (AudioInput*)pvParameter;
+    std::array<AudioFrame, AUDIO_QUEUE_SIZE> sample_frames;
+    size_t read_index = 0;
+    size_t bytes_read = 0;
+    
+    while (1) {
+        bytes_read = audio_input->readData(sample_frames[read_index]);
+        xQueueSend(audioQueue, (sample_frames[read_index]).accessFrame(), portMAX_DELAY);
+        read_index = (size_t)((read_index + 1U) % AUDIO_QUEUE_SIZE);
+
+        vTaskDelay(pdMS_TO_TICKS(AUDIO_POLLING_TIME));
+    }
 }
