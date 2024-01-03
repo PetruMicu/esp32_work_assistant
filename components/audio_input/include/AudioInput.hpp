@@ -32,6 +32,6 @@ public:
     bool init();
     void startRecording();
     void stopRecording();
-    size_t readData(AudioFrame& audio_frame);
+    size_t readData(int32_t* audio_frame);
 };
 

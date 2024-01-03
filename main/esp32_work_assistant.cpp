@@ -13,7 +13,7 @@ AudioInput microphone;
 AudioBuffer sample_buffer;
 
 void processTask(void* pvParameter) {
-    AUDIO_DATA_TYPE raw_samples[AUDIO_BUFFER_SIZE];
+    int32_t raw_samples[AUDIO_BUFFER_SIZE];
     AudioFrame sample_frame;
     
     while (1) {
@@ -22,14 +22,12 @@ void processTask(void* pvParameter) {
             sample_buffer.pushFrame(sample_frame);
             if (sample_buffer.gotOneSecond())
             {
-                
+
             }
-            printf("%ld\n", (sample_buffer.popFrame().accessFrame()[0U] >> 11U));
+            printf("%f\n", (sample_buffer.popFrame().accessFrame()[0U]));
             // for (auto sample : sample_buffer.popFrame())
             // {
-            //     /*24bit data (0x010203) is stored like this: 0x01 0x02 0x03 0x00*/
-            //     /*8 bit shift to get the data + 3bit shift clean the sample of small noise*/
-            //     printf("%ld\n", (sample >> 11U));
+            //     printf("%f\n", (sample));
             // }
         }
         vTaskDelay(pdMS_TO_TICKS(AUDIO_POLLING_TIME));

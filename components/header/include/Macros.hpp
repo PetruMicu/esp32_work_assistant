@@ -6,7 +6,7 @@
 #include "freertos/queue.h"
 #include "driver/i2s_std.h"
 
-typedef int32_t AUDIO_DATA_TYPE;
+typedef float AUDIO_DATA_TYPE;
 extern QueueHandle_t audioQueue;
 
 /*INMP441 microphone connections*/

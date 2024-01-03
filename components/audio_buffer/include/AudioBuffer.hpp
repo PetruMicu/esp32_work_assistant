@@ -15,9 +15,9 @@ private:
 
 public:
     AudioFrame();
-    AudioFrame(const AUDIO_DATA_TYPE* array);
+    AudioFrame(const int32_t* array);
     AUDIO_DATA_TYPE* accessFrame();
-    void writeFrame(const AUDIO_DATA_TYPE* array);
+    void writeFrame(const int32_t* array);
     FrameShape::iterator begin() { return _frame.begin(); }
     FrameShape::iterator end()   { return _frame.end(); }
 };
