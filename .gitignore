@@ -402,4 +402,7 @@ build/
 sdkconfig
 sdkconfig.old
 .vscode/*
+managed_components/*
+main/idf_component.yml
+dependencies.lock
 

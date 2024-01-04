@@ -7,7 +7,7 @@
 #include "driver/i2s_std.h"
 
 typedef float AUDIO_DATA_TYPE;
-extern QueueHandle_t audioQueue;
+extern QueueHandle_t audio_queue;
 
 /*INMP441 microphone connections*/
 #define I2S_WS GPIO_NUM_25
@@ -24,5 +24,6 @@ extern QueueHandle_t audioQueue;
 #define AUDIO_BUFFER_SIZE 128U /*number of samples*/
 #define AUDIO_POLLING_TIME ((AUDIO_BUFFER_SIZE / (SAMPLE_RATE / 1000U)) * 1.1) /*time needed to gather enough samples*/
 #define AUDIO_SOUND_DURATION 1U /*duration in seconds*/
-#define AUDIO_WINDOW_SIZE (SAMPLE_RATE / AUDIO_BUFFER_SIZE + 5U)
+#define AUDIO_NO_FRAMES_IN_SOUND_DURATION (SAMPLE_RATE / AUDIO_BUFFER_SIZE) * AUDIO_SOUND_DURATION
+#define AUDIO_WINDOW_SIZE (AUDIO_NO_FRAMES_IN_SOUND_DURATION + 5U)
 #define AUDIO_QUEUE_SIZE 3U

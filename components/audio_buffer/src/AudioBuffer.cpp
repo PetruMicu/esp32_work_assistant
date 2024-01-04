@@ -5,6 +5,7 @@ AudioFrame::AudioFrame(const int32_t* array) {
 }
 
 AudioFrame::AudioFrame(void) {
+    _max = 0U;
     std::fill(_frame.begin(), _frame.end(), AUDIO_DATA_TYPE{0});
 }
 
@@ -14,19 +15,44 @@ AUDIO_DATA_TYPE* AudioFrame::accessFrame()
 }
 
 void AudioFrame::writeFrame(const int32_t* array) {
+    _max = 0U;
     for (std::size_t i = 0u; i < AUDIO_BUFFER_SIZE; ++i) {
         /*24bit data (0x010203) is stored like this: 0x01 0x02 0x03 0x00*/
         /*8 bit shift to get the data + 3bit shift clean the sample of small noise*/
         _frame[i] = (AUDIO_DATA_TYPE)(array[i] >> 11U);
+        if (abs(_frame[i]) > _max) {
+            _max = abs(_frame[i]);
+        }
     }
 }
+
+std::size_t AudioFrame::getMax() {
+    return _max;
+}
+
+const AUDIO_DATA_TYPE& AudioFrame::operator[](size_t index) const {
+    if (index >= AUDIO_BUFFER_SIZE) {
+        printf("Error: Out of bound accessing\n");
+        return _frame[0U];
+    }
+    return _frame[index];
+}
+
+AUDIO_DATA_TYPE& AudioFrame::operator[](size_t index) {
+    if (index >= AUDIO_BUFFER_SIZE) {
+        printf("Error: Out of bound accessing\n");
+        return _frame[0U];
+    }
+    return _frame[index];
+}
+
+/*----------------------------------------------------------------------------------------------*/
 
 AudioBuffer::AudioBuffer() : _write_index(0), _read_index(0) 
 {
     _write_index = 0u;
     _read_index = 0u;
     _frames_in_buffer = 0u;
-    _frames_in_one_sec = SAMPLE_RATE / AUDIO_BUFFER_SIZE;
 }
 
 void AudioBuffer::pushFrame(const AudioFrame &frame)
@@ -52,6 +78,15 @@ AudioFrame AudioBuffer::popFrame()
     return frame;
 }
 
-bool AudioBuffer::gotOneSecond(){
-    return (_frames_in_buffer == _frames_in_one_sec);
+void AudioBuffer::printOneSecond() {
+    printf("STARTED PRINTING SAMPLES\n");
+    std::size_t no_frames_in_one_sec = AUDIO_NO_FRAMES_IN_SOUND_DURATION;
+    while (no_frames_in_one_sec > 0U)
+    {
+        AudioFrame frame = popFrame();
+        for (auto sample : frame) {
+            printf("%f\n", sample);
+        }
+        no_frames_in_one_sec--;
+    }
 }

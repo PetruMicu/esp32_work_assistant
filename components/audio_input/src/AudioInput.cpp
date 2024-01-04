@@ -82,7 +82,7 @@ void AudioInput::startRecording()
     {
         _recording = true;
         status = i2s_channel_enable(_rx_handle);
-
+        vTaskDelay(pdMS_TO_TICKS(1000));
         if (ESP_OK == status)
         {
             printf("Audio enable success\n");
@@ -92,7 +92,6 @@ void AudioInput::startRecording()
                         this,                     // Task parameter
                         configMAX_PRIORITIES - 1, // Task priority (adjust as needed)
                         &_sample_task_handler);
-            vTaskDelay(pdMS_TO_TICKS(50));
         }
         else
         {
@@ -122,12 +121,12 @@ void AudioInput::stopRecording()
     }
 }
 
-size_t AudioInput::readData(int32_t* sample_buffer)
+size_t AudioInput::readData(int32_t* samples)
 {
     size_t bytesRead;
     esp_err_t status;
 
-    status = i2s_channel_read(_rx_handle, sample_buffer, (AUDIO_BUFFER_SIZE * sizeof(int32_t)), &bytesRead, portMAX_DELAY);
+    status = i2s_channel_read(_rx_handle, samples, (AUDIO_BUFFER_SIZE * sizeof(int32_t)), &bytesRead, portMAX_DELAY);
     if (ESP_OK != status)
     {
         printf("Audio read fail: %ld\n", (uint32_t)status);
@@ -147,7 +146,7 @@ void sampleTask(void* pvParameter) {
     
     while (1) {
         (void)audio_input->readData((sample_frames[read_index]).data());
-        xQueueSend(audioQueue, (sample_frames[read_index]).data(), portMAX_DELAY);
+        xQueueSend(audio_queue, (sample_frames[read_index]).data(), portMAX_DELAY);
         read_index = (size_t)((read_index + 1U) % AUDIO_QUEUE_SIZE);
 
         vTaskDelay(pdMS_TO_TICKS(AUDIO_POLLING_TIME));
