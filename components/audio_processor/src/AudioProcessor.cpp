@@ -1,5 +1,7 @@
 #include "AudioProcessor.hpp"
 
+std::size_t dummy_count = 0;
+
 AudioProcessor::AudioProcessor() {
     std::fill(_window.begin(), _window.end(), AUDIO_DATA_TYPE{0});
     std::fill(_fft.begin(), _fft.end(), AUDIO_DATA_TYPE{0});
@@ -55,6 +57,7 @@ void AudioProcessor::performFFT() {
     std::size_t max_index = 0;
 
     frame = _sample_buffer->popFrame();
+    /*Get the maximum value of the frame (mean value already removed)*/
     frame_max = frame.getMax();
     /*Apply window*/
     for (std::size_t i = 0U; i < AUDIO_BUFFER_SIZE; ++i) {
@@ -75,8 +78,13 @@ void AudioProcessor::performFFT() {
         }
     }
     
-    printf("Frequency detected: %.2f\n", (float)((float)max_index * frequency_step));
-    dsps_view(_fft.data(), AUDIO_BUFFER_SIZE/2U, AUDIO_BUFFER_SIZE/2U, 10,  -60, 40, '|');
+    dummy_count++;
+    if (dummy_count == 100)
+    {
+        printf("Frequency detected: %.2f\n", (float)((float)max_index * frequency_step));
+        dsps_view(_fft.data(), AUDIO_BUFFER_SIZE/2U, AUDIO_BUFFER_SIZE/2U, 10,  -60, 40, '|');
+        dummy_count = 0;
+    }
 }
 
 void AudioProcessor::computeSpectogram(AUDIO_DATA_TYPE* spectogram, std::size_t audio_frames) {

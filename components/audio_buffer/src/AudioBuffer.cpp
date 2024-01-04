@@ -6,6 +6,7 @@ AudioFrame::AudioFrame(const int32_t* array) {
 
 AudioFrame::AudioFrame(void) {
     _max = 0U;
+    _mean = 0U;
     std::fill(_frame.begin(), _frame.end(), AUDIO_DATA_TYPE{0});
 }
 
@@ -16,17 +17,35 @@ AUDIO_DATA_TYPE* AudioFrame::accessFrame()
 
 void AudioFrame::writeFrame(const int32_t* array) {
     _max = 0U;
+    _mean = 0U;
+    /*Store samples and find mean value*/
     for (std::size_t i = 0u; i < AUDIO_BUFFER_SIZE; ++i) {
         /*24bit data (0x010203) is stored like this: 0x01 0x02 0x03 0x00*/
         /*8 bit shift to get the data + 3bit shift clean the sample of small noise*/
         _frame[i] = (AUDIO_DATA_TYPE)(array[i] >> 11U);
+        _mean += _frame[i];
+        if (abs(_frame[i]) > _max) {
+            _max = abs(_frame[i]);
+        }
+    }
+    _mean /= AUDIO_BUFFER_SIZE;
+
+    /*Remove mean from the samples and find max value*/
+    for (std::size_t i = 0u; i < AUDIO_BUFFER_SIZE; ++i) {
+        /*24bit data (0x010203) is stored like this: 0x01 0x02 0x03 0x00*/
+        /*8 bit shift to get the data + 3bit shift clean the sample of small noise*/
+        _frame[i] -= _mean;
         if (abs(_frame[i]) > _max) {
             _max = abs(_frame[i]);
         }
     }
 }
 
-std::size_t AudioFrame::getMax() {
+AUDIO_DATA_TYPE AudioFrame::getMax() {
+    return _max;
+}
+
+AUDIO_DATA_TYPE AudioFrame::getMean() {
     return _max;
 }
 
@@ -63,6 +82,7 @@ void AudioBuffer::pushFrame(const AudioFrame &frame)
     // Handle case when write index overtakes read index
     if (_write_index == _read_index) {
         _read_index = (_read_index + 1) % AUDIO_WINDOW_SIZE;
+        printf("FRAME LOST\n");
     }
     else {
         _frames_in_buffer++;

@@ -26,12 +26,13 @@ void processTask(void* pvParameter) {
             samples.pushFrame(sample_frame);
             if (AUDIO_NO_FRAMES_IN_SOUND_DURATION == samples.getFramesInBuffer())
             {
-                microphone.stopRecording();
+                // microphone.stopRecording();
                 processor.computeSpectogram(spectogram, AUDIO_NO_FRAMES_IN_SOUND_DURATION);
                 // for (std::size_t i = 0U; i < SAMPLE_RATE; ++i) {
-                //     // printf("%.0f\n", spectogram[i]);
+                //     printf("%.0f\n", spectogram[i]);
                 // }
                 // samples.printOneSecond();
+                printf("GOT INPUT\n");
             }
         }
         vTaskDelay(pdMS_TO_TICKS(AUDIO_POLLING_TIME));
@@ -42,7 +43,7 @@ extern "C" void app_main() {
     audio_queue = xQueueCreate(AUDIO_QUEUE_SIZE, sizeof(AudioFrame));
     xTaskCreate(processTask,               // Task function
                 "ProcessTask",             // Task name (for debugging)
-                4096,                     // Stack size (adjust as needed)
+                8192,                     // Stack size (adjust as needed)
                 NULL,                     // Task parameter
                 configMAX_PRIORITIES - 1, // Task priority (adjust as needed)
                 NULL);
