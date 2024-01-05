@@ -405,4 +405,9 @@ sdkconfig.old
 managed_components/*
 main/idf_component.yml
 dependencies.lock
+*.wav
+./*
+train_neural_network/.ipynb_checkpoints/*
+train_neural_network/training_data/*
+train_neural_network/training_data/_background_noise_/*
 
