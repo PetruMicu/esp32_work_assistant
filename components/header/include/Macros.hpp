@@ -22,8 +22,14 @@ extern QueueHandle_t audio_queue;
 
 /*Sound sampling parameters*/
 #define AUDIO_BUFFER_SIZE 128U /*number of samples*/
+#define AUDIO_OVERLAP_FRACTION 0.25 /*overlap fraction of the audio frames for STFT*/
+#define AUDIO_HOP_SIZE (1 - AUDIO_OVERLAP_FRACTION) * AUDIO_BUFFER_SIZE  /*hop size for overlaping over audio frames used for STFT*/
 #define AUDIO_POLLING_TIME ((AUDIO_BUFFER_SIZE / (SAMPLE_RATE / 1000U)) * 1.1) /*time needed to gather enough samples*/
 #define AUDIO_SOUND_DURATION 1U /*duration in seconds*/
 #define AUDIO_NO_FRAMES_IN_SOUND_DURATION (SAMPLE_RATE / AUDIO_BUFFER_SIZE) * AUDIO_SOUND_DURATION
 #define AUDIO_WINDOW_SIZE (AUDIO_NO_FRAMES_IN_SOUND_DURATION + 5U)
 #define AUDIO_QUEUE_SIZE 3U
+
+#define FFT_FRAMES 170 /*(SAMPLE_RATE - AUDIO_BUFFER_SIZE) / AUDIO_HOP_SIZE + 1*/
+#define FFT_FREQ_BINS 65 /*AUDIO_BUFFER_SIZE / 2 + 1*/
+#define SPECTOGRAM_SIZE FFT_FRAMES * FFT_FREQ_BINS

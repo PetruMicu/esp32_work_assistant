@@ -14,7 +14,7 @@ AudioInput microphone;
 AudioBuffer samples;
 AudioProcessor processor;
 /*this would be part of the neural network*/
-AUDIO_DATA_TYPE spectogram[SAMPLE_RATE];
+AUDIO_DATA_TYPE spectogram[SPECTOGRAM_SIZE];
 
 void processTask(void* pvParameter) {
     int32_t raw_samples[AUDIO_BUFFER_SIZE];
@@ -26,13 +26,13 @@ void processTask(void* pvParameter) {
             samples.pushFrame(sample_frame);
             if (AUDIO_NO_FRAMES_IN_SOUND_DURATION == samples.getFramesInBuffer())
             {
+                printf("GOT_FRAMES\n");
                 // microphone.stopRecording();
                 processor.computeSpectogram(spectogram, AUDIO_NO_FRAMES_IN_SOUND_DURATION);
                 // for (std::size_t i = 0U; i < SAMPLE_RATE; ++i) {
                 //     printf("%.0f\n", spectogram[i]);
                 // }
                 // samples.printOneSecond();
-                printf("GOT INPUT\n");
             }
         }
         vTaskDelay(pdMS_TO_TICKS(AUDIO_POLLING_TIME));

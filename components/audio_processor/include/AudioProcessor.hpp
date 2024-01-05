@@ -12,11 +12,13 @@ class AudioProcessor {
 private:
     std::array<AUDIO_DATA_TYPE, AUDIO_BUFFER_SIZE> _window;
     std::array<AUDIO_DATA_TYPE, 2U * AUDIO_BUFFER_SIZE> _fft;
-    AUDIO_DATA_TYPE* _ptr_to_fft1;
-    AUDIO_DATA_TYPE* _ptr_to_fft2;
     AudioBuffer* _sample_buffer;
+    AUDIO_DATA_TYPE _global_mean;
+    AUDIO_DATA_TYPE _global_max;
+    bool _no_overlap;
     bool _configured;
     void performFFT();
+    void analyzeFrames(std::size_t audio_frames);
 public:
     AudioProcessor();
     bool init(AudioBuffer& samples);
