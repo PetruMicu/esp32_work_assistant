@@ -48,7 +48,8 @@ AUDIO_DATA_TYPE AudioFrame::getMean() {
 
 /*----------------------------------------------------------------------------------------------*/
 
-AudioBuffer::AudioBuffer() : _write_index(0), _read_index(0) {
+AudioBuffer::AudioBuffer() {
+    clearBuffer();
     _write_index = 0u;
     _read_index = 0u;
     _frames_in_buffer = 0u;
@@ -112,6 +113,17 @@ AudioFrame AudioBuffer::overlapFrames(std::size_t hop_size) {
 
 void AudioBuffer::resetOverlap() {
     _overlap_index = 0U;
+}
+
+void AudioBuffer::clearBuffer() {
+    _write_index = 0u;
+    _read_index = 0u;
+    _frames_in_buffer = 0u;
+    _overlap_index = 0U;
+
+    for (auto &frame : _window) {
+        std::fill(frame.begin(), frame.end(), AUDIO_DATA_TYPE{0U});
+    }
 }
 
 void AudioBuffer::printOneSecond() {

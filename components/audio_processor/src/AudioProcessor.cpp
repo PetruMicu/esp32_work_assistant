@@ -94,7 +94,7 @@ void AudioProcessor::performFFT() {
         }
     }
     // dummy_count++;
-    // if (dummy_count == 100)
+    // if (dummy_count == FFT_FRAMES / 2)
     // {
     //     printf("Frequency detected: %.2f\n", (float)(max_index * frequency_step));
     //     dsps_view(_fft.data(), AUDIO_BUFFER_SIZE / 2 + 1, AUDIO_BUFFER_SIZE / 2 + 1, 10,  -60, 40, '|');

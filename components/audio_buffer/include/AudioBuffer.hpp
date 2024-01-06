@@ -56,5 +56,6 @@ public:
     void resetOverlap();
     AudioFrame overlapFrames(std::size_t hop_size);
     std::size_t getFramesInBuffer() { return _frames_in_buffer; }
+    void clearBuffer();
     void printOneSecond();
 };

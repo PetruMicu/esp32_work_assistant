@@ -36,4 +36,4 @@ extern QueueHandle_t audio_queue;
 #define SPECTOGRAM_STEP (int)ceilf(((float)AUDIO_BUFFER_SIZE / 2 + 1) / (float)FFT_AVG_POOL_SIZE)
 #define EPSILON 1e-6
 
-#define TENSOR_ARENA_SIZE 25000
+#define TENSOR_ARENA_SIZE 20000
