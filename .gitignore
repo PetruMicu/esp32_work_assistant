@@ -410,4 +410,6 @@ dependencies.lock
 train_neural_network/.ipynb_checkpoints/*
 train_neural_network/training_data/*
 train_neural_network/training_data/_background_noise_/*
+third_party_neural_network/*
+train_neural_network/model.tflite
 
