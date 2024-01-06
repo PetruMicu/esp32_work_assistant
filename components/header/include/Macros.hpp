@@ -33,7 +33,7 @@ extern QueueHandle_t audio_queue;
 #define FFT_FRAMES 124 /*(SAMPLE_RATE - AUDIO_BUFFER_SIZE) / AUDIO_HOP_SIZE + 1*/
 #define FFT_FREQ_BINS 22 /*AUDIO_BUFFER_SIZE / 2 + 1*/
 #define FFT_AVG_POOL_SIZE 6
-#define SPECTOGRAM_STEP (int)ceilf(((float)AUDIO_BUFFER_SIZE / 2 + 1) / (float)FFT_AVG_POOL_SIZE)
+#define SPECTROGRAM_STEP (int)ceilf(((float)AUDIO_BUFFER_SIZE / 2 + 1) / (float)FFT_AVG_POOL_SIZE)
 #define EPSILON 1e-6
 
 #define TENSOR_ARENA_SIZE 20000

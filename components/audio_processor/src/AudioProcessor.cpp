@@ -98,24 +98,24 @@ void AudioProcessor::performFFT() {
     // {
     //     printf("Frequency detected: %.2f\n", (float)(max_index * frequency_step));
     //     dsps_view(_fft.data(), AUDIO_BUFFER_SIZE / 2 + 1, AUDIO_BUFFER_SIZE / 2 + 1, 10,  -60, 40, '|');
-    //     dsps_view(_avg_fft.data(), SPECTOGRAM_STEP, SPECTOGRAM_STEP, 10,  -60, 40, '|');
+    //     dsps_view(_avg_fft.data(), SPECTROGRAM_STEP, SPECTROGRAM_STEP, 10,  -60, 40, '|');
     //     dummy_count = 0;
     // }
 }
 
-void AudioProcessor::computeSpectogram(AUDIO_DATA_TYPE* spectogram, std::size_t audio_frames) {
+void AudioProcessor::computeSpectrogram(AUDIO_DATA_TYPE* spectrogram, std::size_t audio_frames) {
     if (true == _configured) {
-        AUDIO_DATA_TYPE* ptr_to_spectogram_segment = spectogram;
-        std::size_t spectogram_step = SPECTOGRAM_STEP;
+        AUDIO_DATA_TYPE* ptr_to_spectrogram_segment = spectrogram;
+        std::size_t spectrogram_step = SPECTROGRAM_STEP;
         /*Process samples by removing mean value and normalize by max value*/
         analyzeFrames(audio_frames);
 
         for (std::size_t i = 0U; i < FFT_FRAMES; ++i) {
             performFFT();
             for (std::size_t j = 0U; j < FFT_FREQ_BINS; ++j) {
-                ptr_to_spectogram_segment[j] = log10f(_avg_fft[j] + EPSILON);
+                ptr_to_spectrogram_segment[j] = log10f(_avg_fft[j] + EPSILON);
             }
-            ptr_to_spectogram_segment += spectogram_step;
+            ptr_to_spectrogram_segment += spectrogram_step;
         }
         /*remove last frame*/
         _sample_buffer->popFrame();

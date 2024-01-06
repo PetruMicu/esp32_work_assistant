@@ -19,10 +19,6 @@ TensorFlowModel::~TensorFlowModel() {
 bool TensorFlowModel::init() {
     TfLiteStatus status;
 
-    if (!_tensor_arena) {
-        printf("Error: Arena memory not allocated\n");
-    }
-
     _tensor_arena = (uint8_t*)malloc(TENSOR_ARENA_SIZE * sizeof(uint8_t));
     if (!_tensor_arena)
     {

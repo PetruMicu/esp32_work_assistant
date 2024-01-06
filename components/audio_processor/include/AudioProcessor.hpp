@@ -24,5 +24,5 @@ public:
     AudioProcessor();
     bool init(AudioBuffer& samples);
     void deinit();
-    void computeSpectogram(AUDIO_DATA_TYPE* spectogram, std::size_t audio_frames);
+    void computeSpectrogram(AUDIO_DATA_TYPE* spectrogram, std::size_t audio_frames);
 };

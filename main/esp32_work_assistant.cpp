@@ -38,7 +38,7 @@ void processTask(void* pvParameter) {
                 samples.pushFrame(sample_frame);
                 if (AUDIO_NO_FRAMES_IN_SOUND_DURATION == samples.getFramesInBuffer())
                 {
-                    processor.computeSpectogram(model.getInput(), AUDIO_NO_FRAMES_IN_SOUND_DURATION);
+                    processor.computeSpectrogram(model.getInput(), AUDIO_NO_FRAMES_IN_SOUND_DURATION);
                     float result = model.predict();
                     printf("Model prediction: %.2f\n", result);
                     if (result >= 0.95) {
