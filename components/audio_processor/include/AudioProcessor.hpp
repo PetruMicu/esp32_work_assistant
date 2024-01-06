@@ -12,6 +12,7 @@ class AudioProcessor {
 private:
     std::array<AUDIO_DATA_TYPE, AUDIO_BUFFER_SIZE> _window;
     std::array<AUDIO_DATA_TYPE, 2U * AUDIO_BUFFER_SIZE> _fft;
+    std::array<AUDIO_DATA_TYPE, FFT_FREQ_BINS> _avg_fft;
     AudioBuffer* _sample_buffer;
     AUDIO_DATA_TYPE _global_mean;
     AUDIO_DATA_TYPE _global_max;

@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <array>
 #include <algorithm>
+#include <cmath>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "Macros.hpp"

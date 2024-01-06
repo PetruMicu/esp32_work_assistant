@@ -8,31 +8,38 @@
 #include "AudioBuffer.hpp"
 #include "AudioInput.hpp"
 #include "AudioProcessor.hpp"
+#include "TensorFlowModel.hpp"
 
 QueueHandle_t audio_queue;
 AudioInput microphone;
 AudioBuffer samples;
 AudioProcessor processor;
-/*this would be part of the neural network*/
-AUDIO_DATA_TYPE spectogram[SPECTOGRAM_SIZE];
+TensorFlowModel model;
+
 
 void processTask(void* pvParameter) {
+    bool status;
     int32_t raw_samples[AUDIO_BUFFER_SIZE];
     AudioFrame sample_frame;
-    processor.init(samples);
+
+    status = processor.init(samples);
+    if (false == status) {
+        printf("Error: Processor Init Failed\n");
+        return;
+    }
     while (1) {
         if (xQueueReceive(audio_queue, raw_samples, portMAX_DELAY) == pdPASS) {
             sample_frame.writeFrame(raw_samples);
             samples.pushFrame(sample_frame);
             if (AUDIO_NO_FRAMES_IN_SOUND_DURATION == samples.getFramesInBuffer())
             {
-                printf("GOT_FRAMES\n");
                 // microphone.stopRecording();
-                processor.computeSpectogram(spectogram, AUDIO_NO_FRAMES_IN_SOUND_DURATION);
-                // for (std::size_t i = 0U; i < SAMPLE_RATE; ++i) {
-                //     printf("%.0f\n", spectogram[i]);
-                // }
-                // samples.printOneSecond();
+                processor.computeSpectogram(model.getInput(), AUDIO_NO_FRAMES_IN_SOUND_DURATION);
+                float result = model.predict();
+                printf("%.2f\n", result);
+                if (result >= 0.9) {
+                    printf("WORD FOUND!\n");
+                }
             }
         }
         vTaskDelay(pdMS_TO_TICKS(AUDIO_POLLING_TIME));
@@ -54,5 +61,11 @@ extern "C" void app_main() {
         printf("Microphone initialization failed\n");
         return;
     }
+
+    if (false == model.init()) {
+        printf("Error: Model Init Failed\n");
+        return;
+    }
     microphone.startRecording();
+    printf("%d", AUDIO_WINDOW_SIZE);
 }
