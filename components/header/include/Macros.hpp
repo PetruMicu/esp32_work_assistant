@@ -37,3 +37,8 @@ extern QueueHandle_t audio_queue;
 #define EPSILON 1e-6
 
 #define TENSOR_ARENA_SIZE 20000
+
+#define WIFI_SSID      "Mcu"
+#define WIFI_PASS      "Mcu1234*;"
+#define HOST_IP_ADDR   "192.168.1.134"
+#define PORT           5005

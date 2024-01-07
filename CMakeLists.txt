@@ -5,5 +5,7 @@
 cmake_minimum_required(VERSION 3.5)
 
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
-set(EXTRA_COMPONENT_DIRS "components/audio_buffer" "components/audio_input" "components/audio_processor" "components/tensorflow_model")
+set(EXTRA_COMPONENT_DIRS "components/audio_buffer" "components/audio_input" 
+                        "components/audio_processor" "components/tensorflow_model"
+                        "components/client")
 project(esp32_work_assistant)
