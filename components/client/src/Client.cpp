@@ -176,3 +176,23 @@ bool Client::sendAudioSamples(int32_t* samples) {
         return false;
     }
 }
+
+bool Client::sendAudioFrame(AudioFrame& frame) {
+    int32_t err;
+    int32_t samples[AUDIO_BUFFER_SIZE * sizeof(int32_t)];
+
+    if (true == _connected) {
+        for (std::size_t i = 0u; i < AUDIO_BUFFER_SIZE; ++i) {
+            samples[i] = (int32_t)frame[i];
+        }
+        err = send(_socket, samples, AUDIO_BUFFER_SIZE * sizeof(int32_t), 0);
+        if (err < 0) {
+            printf("Error occurred during sending\n");
+            return false;
+        }
+        return true;
+    } else {
+        printf("Warning: Client not connected to host\n");
+        return false;
+    }
+}

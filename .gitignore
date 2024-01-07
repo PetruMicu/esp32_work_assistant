@@ -412,4 +412,4 @@ train_neural_network/training_data/*
 train_neural_network/training_data/_background_noise_/*
 third_party_neural_network/*
 train_neural_network/model.tflite
-
+x_input_from_esp32/*

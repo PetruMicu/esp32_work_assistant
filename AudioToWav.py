@@ -1,6 +1,9 @@
 import socket
 import wave
 import struct
+import random
+import string
+import time
 
 def increase_volume(data, volume_factor, width, channels):
     format = {1: 'B', 2: 'h', 4: 'i'}[width] * channels
@@ -26,20 +29,20 @@ RATE = 16000  # Sample rate
 WIDTH = 4     # Sample width (32-bit)
 VOLUME_FACTOR = 2**14
 
-counter = 1  # Initialize a counter for file naming
-
 # Create socket
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.bind((TCP_IP, TCP_PORT))
 s.listen(1)
 
 while True:
-
     conn, addr = s.accept()
     print(f"Connection address: {addr}")
 
-    # Create a new wave file with an incremental name
-    output_filename = f'input{counter}.wav'
+    # Generate a unique and random filename
+    random_string = ''.join(random.choices(string.ascii_letters + string.digits, k=8))
+    timestamp = int(time.time())
+    output_filename = f'x_input_from_esp32/input_{timestamp}_{random_string}.wav'
+
     wf = wave.open(output_filename, 'wb')
     wf.setnchannels(CHANNELS)
     wf.setsampwidth(WIDTH)
@@ -49,7 +52,8 @@ while True:
     try:
         while True:
             data = conn.recv(BUFFER_SIZE)
-            if not data: break
+            if not data:
+                break
             buffer += data
 
             # Process complete frames
@@ -63,6 +67,5 @@ while True:
         wf.close()
         conn.close()
         # s.close()
-        counter += 1  # Increment the counter for the next iteration
+        print(f"Audio saved to {output_filename}")
 
-    print(f"Audio saved to {output_filename}")

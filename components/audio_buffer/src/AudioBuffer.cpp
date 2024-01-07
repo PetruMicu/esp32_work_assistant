@@ -80,7 +80,7 @@ AudioFrame AudioBuffer::popFrame() {
 }
 
 /*returns a copy of the current frame + offset but does not remove it*/
-AudioFrame AudioBuffer::viewFrame(std::size_t offset) {
+AudioFrame AudioBuffer::viewFrame(int32_t offset) {
     return _window[(_read_index + offset) % AUDIO_WINDOW_SIZE];
 }
 

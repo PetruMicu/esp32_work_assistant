@@ -52,7 +52,7 @@ public:
     AudioBuffer();
     void pushFrame(const AudioFrame &frame);
     AudioFrame popFrame();
-    AudioFrame viewFrame(std::size_t offset);
+    AudioFrame viewFrame(int32_t offset);
     void resetOverlap();
     AudioFrame overlapFrames(std::size_t hop_size);
     std::size_t getFramesInBuffer() { return _frames_in_buffer; }

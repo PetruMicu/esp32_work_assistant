@@ -19,6 +19,20 @@ TensorFlowModel model;
 Wifi wifi_interface;
 Client client(HOST_IP_ADDR);
 
+/*Send the audio that woke up the system for future training*/
+void sendWakeWord() {
+    if (false == client.connectToHost()) {
+        return;
+    }
+    for (int32_t i = AUDIO_NO_FRAMES_IN_SOUND_DURATION; i >= 0; i--) {
+        AudioFrame frame = samples.viewFrame(-i);
+        if (false == client.sendAudioFrame(frame)) {
+            client.disconnectFromHost();
+            break;
+        }
+    }
+}
+
 
 void processTask(void* pvParameter) {
     bool awake = false;
@@ -42,6 +56,7 @@ void processTask(void* pvParameter) {
                 printf("Model prediction: %.2f\n", result);
                 if (result >= 0.95) {
                     // microphone.stopRecording();
+                    // sendWakeWord();
                     samples.clearBuffer();
                     awake = true;
                     printf("ESP32 WorkStation awake and listening\n");
@@ -58,7 +73,6 @@ void processTask(void* pvParameter) {
             }
         } else {
             if (false == client.connectToHost()) {
-                printf("Error: Client connection failed\n");
                 printf("ESP32 WorkStation went to sleep\n");
                 awake = false;
             }
@@ -68,7 +82,7 @@ void processTask(void* pvParameter) {
                 awake = false;
             } else {
                 count++;
-                if (AUDIO_NO_FRAMES_IN_SOUND_DURATION == count) {
+                if (AUDIO_NO_FRAMES_IN_SOUND_DURATION * 5U == count) {
                     printf("Finished sending audio to host\n");
                     count = 0;
                     printf("ESP32 WorkStation went to sleep\n");

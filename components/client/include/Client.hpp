@@ -54,4 +54,5 @@ public:
     bool connectToHost();
     void disconnectFromHost();
     bool sendAudioSamples(int32_t* samples);
+    bool sendAudioFrame(AudioFrame& frame);
 };
